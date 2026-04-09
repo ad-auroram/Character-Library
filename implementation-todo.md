@@ -1,0 +1,151 @@
+# Character Library - Implementation To-Do (On Top of Starter)
+
+This checklist assumes the current Supabase auth starter is already in place.
+
+## 1) Project Setup and Environment
+
+- [x] Configure project for hosted (remote) Supabase in development and production.
+- [ ] Add and verify required environment variables locally and in Vercel:
+  - [ ] `NEXT_PUBLIC_SUPABASE_URL`
+  - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - [ ] `SUPABASE_SERVICE_ROLE_KEY` (server-only, never public)
+  - [ ] `OPENAI_API_KEY` (server-only)
+  - [ ] `REDIS_URL` (or Redis connection fields)
+- [x] Link Supabase CLI to hosted project and push migrations.
+- [ ] Decide feature-flag strategy (MVP vs optional features like AI/PDF/Quick Build).
+
+## 2) Data Model and Supabase Schema
+
+- [x] Create migration(s) for `characters` table:
+  - [x] `id` (uuid), `user_id` (owner), timestamps
+  - [x] core fields: name, role, summary/description, notes, visibility (`public/private`)
+  - [x] structured stats (either JSONB or explicit columns)
+- [x] Create migration(s) for `tags` table.
+- [x] Create migration(s) for `character_tags` join table.
+- [x] Create migration(s) for `character_images` table (gallery metadata, ordering, URLs).
+- [ ] Create migration(s) for `bookmarks` table (`user_id`, `character_id`, unique constraint).
+- [x] Add indexes for expected queries:
+  - [x] owner + updated date
+  - [x] visibility + updated date
+  - [x] tag lookups via join table
+  - [ ] text search columns (name/summary/notes)
+- [x] Add/validate foreign keys with proper cascade behavior.
+
+## 3) Row Level Security (RLS) and Access Rules
+
+- [x] Enable RLS on all new domain tables.
+- [x] Add policies so users can CRUD only their own characters/images.
+- [x] Add read policy for public characters.
+- [ ] Add policies for bookmarks (users manage only their own bookmarks).
+- [x] Add policies for tags/join table access consistent with character visibility.
+- [ ] Validate policies using multiple test users.
+
+## 4) Type Generation and Shared Types
+
+- [ ] Regenerate Supabase database types after each schema change.
+- [ ] Add/extend TypeScript domain types for:
+  - [x] Character DTO/form model
+  - [x] Tag model
+  - [x] Image model
+  - [ ] Bookmark model
+  - [ ] Quick Build mapped fields
+- [x] Keep client/server payload types aligned to avoid runtime shape mismatches.
+
+## 5) Character CRUD (Core Feature)
+
+- [x] Build create character page/form.
+- [x] Build edit character page/form.
+- [x] Build character details page.
+- [x] Build character list page (owned + optionally public feed).
+- [x] Implement server actions or API routes for create/update/delete.
+- [x] Add validation for required fields and stats constraints.
+- [x] Handle image URL/gallery management in create/edit flow.
+- [x] Add visibility toggle (public/private).
+
+## 6) Search and Filtering
+
+- [ ] Implement text search (name + summary + notes).
+- [ ] Implement filtering by tags.
+- [ ] Implement visibility-aware result logic (owner private + public browsing).
+- [ ] Add empty/loading/error states in search UI.
+
+## 7) Bookmarks
+
+- [ ] Add bookmark/unbookmark actions for character cards/detail view.
+- [ ] Add bookmarks tab/section in profile page.
+- [ ] Show bookmarked character list with links and metadata.
+- [ ] Prevent duplicate bookmark entries.
+
+## 8) Quick Build (D&D 5e API)
+
+- [ ] Build a service module for D&D API calls.
+- [ ] Add caching/throttling strategy for external requests.
+- [ ] Create Quick Build UI for selecting race/class/(optional spells/items).
+- [ ] Map API response fields into local character defaults.
+- [ ] Allow manual overrides before save.
+- [ ] Add robust fallback when API is unavailable (manual entry path).
+
+## 9) AI Character Summary
+
+- [ ] Create server endpoint/action that builds prompt from character fields.
+- [ ] Integrate OpenAI API call from server only.
+- [ ] Add token limit, timeout, and retry/error handling.
+- [ ] Add safety validation/sanitization of generated output.
+- [ ] Add UI action: generate summary in create/edit flow.
+- [ ] Add save/overwrite/edit flow for generated summary.
+- [ ] Add fallback UX when AI generation fails.
+
+## 10) PDF Export with Background Worker
+
+- [ ] Set up Redis instance for queueing.
+- [ ] Add BullMQ queue producer in Next.js app.
+- [ ] Create separate worker process for PDF jobs.
+- [ ] Define job payload schema and validation.
+- [ ] Build one stable printable HTML/CSS template first.
+- [ ] Implement PDF renderer (Puppeteer or equivalent).
+- [ ] Store or stream generated PDF for download.
+- [ ] Add job status polling or loading/progress UI.
+- [ ] Add retry logic, dead-letter/failure handling, and logging.
+
+## 11) UI/UX Integration
+
+- [x] Update dashboard to show character workflow entry points.
+- [ ] Add navigation for library, create, bookmarks, profile.
+- [ ] Ensure mobile responsiveness for forms/list/detail pages.
+- [x] Add friendly empty states and actionable errors.
+- [ ] Keep accessibility basics in place (labels, keyboard flow, contrast).
+
+## 12) Testing
+
+- [ ] Add unit tests for validation and mapping logic.
+- [ ] Add unit tests for search/filter query helpers.
+- [ ] Add tests for AI prompt builder and response parser.
+- [ ] Add tests for D&D API mapping layer (mock external responses).
+- [ ] Add integration tests for protected character CRUD paths.
+- [ ] Add tests for bookmarks behavior and permissions.
+- [ ] Add at least one end-to-end path for create -> view -> bookmark.
+
+## 13) Deployment and Operations
+
+- [ ] Configure Vercel env vars for all required keys.
+- [ ] Ensure Supabase migration workflow is applied in production.
+- [ ] Decide where worker runs in production (separate service/container).
+- [ ] Add production logging/monitoring for API and worker errors.
+- [ ] Add rate limiting or abuse controls for AI and PDF endpoints.
+
+## 14) Documentation
+
+- [ ] Document schema and RLS decisions.
+- [x] Document local vs remote Supabase workflows.
+- [ ] Document Quick Build external API limitations and fallback behavior.
+- [ ] Document AI usage, cost controls, and failure fallback.
+- [ ] Document worker/PDF architecture and recovery steps.
+
+## 15) Suggested Delivery Order (MVP First)
+
+- [x] Milestone 1: Remote Supabase + schema + RLS + character CRUD.
+- [ ] Milestone 2: Search/filter + bookmarks.
+- [ ] Milestone 3: Quick Build integration (manual fallback retained).
+- [ ] Milestone 4: AI summary generation (manual fallback retained).
+- [ ] Milestone 5: PDF worker pipeline + downloadable exports.
+- [ ] Milestone 6: Hardening, tests, and deployment polish.
