@@ -24,6 +24,7 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [x] Create migration(s) for `character_tags` join table.
 - [x] Create migration(s) for `character_images` table (gallery metadata, ordering, URLs).
 - [ ] Create migration(s) for `bookmarks` table (`user_id`, `character_id`, unique constraint).
+- [ ] Create migration(s) for `character_spells` table (`character_id`, spell metadata from API, unique per character+spell index/id).
 - [x] Add indexes for expected queries:
   - [x] owner + updated date
   - [x] visibility + updated date
@@ -36,7 +37,7 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [x] Enable RLS on all new domain tables.
 - [x] Add policies so users can CRUD only their own characters/images.
 - [x] Add read policy for public characters.
-- [ ] Add policies for bookmarks (users manage only their own bookmarks).
+- [x] Add policies for bookmarks (users manage only their own bookmarks).
 - [x] Add policies for tags/join table access consistent with character visibility.
 - [ ] Validate policies using multiple test users.
 
@@ -48,7 +49,7 @@ This checklist assumes the current Supabase auth starter is already in place.
   - [x] Tag model
   - [x] Image model
   - [ ] Bookmark model
-  - [ ] Quick Build mapped fields
+  - [ ] Spell model (API response + persisted character spell shape)
 - [x] Keep client/server payload types aligned to avoid runtime shape mismatches.
 
 ## 5) Character CRUD (Core Feature)
@@ -64,26 +65,30 @@ This checklist assumes the current Supabase auth starter is already in place.
 
 ## 6) Search and Filtering
 
-- [ ] Implement text search (name + summary + notes).
-- [ ] Implement filtering by tags.
-- [ ] Implement visibility-aware result logic (owner private + public browsing).
-- [ ] Add empty/loading/error states in search UI.
+- [x] Implement text search (name + summary + notes).
+- [x] Implement filtering by tags.
+- [x] Implement visibility-aware result logic (owner private + public browsing).
+- [x] Add empty/loading/error states in search UI.
 
 ## 7) Bookmarks
 
-- [ ] Add bookmark/unbookmark actions for character cards/detail view.
-- [ ] Add bookmarks tab/section in profile page.
-- [ ] Show bookmarked character list with links and metadata.
-- [ ] Prevent duplicate bookmark entries.
+- [x] Add bookmark/unbookmark actions for character cards/detail view.
+- [x] Add bookmarks tab/section in profile page.
+- [x] Show bookmarked character list with links and metadata.
+- [x] Prevent duplicate bookmark entries.
 
-## 8) Quick Build (D&D 5e API)
+## 8) Spell Integration (D&D 5e API)
 
-- [ ] Build a service module for D&D API calls.
-- [ ] Add caching/throttling strategy for external requests.
-- [ ] Create Quick Build UI for selecting race/class/(optional spells/items).
-- [ ] Map API response fields into local character defaults.
-- [ ] Allow manual overrides before save.
-- [ ] Add robust fallback when API is unavailable (manual entry path).
+- [ ] Build a service module for D&D API spell search and spell detail calls.
+- [ ] Add caching/throttling strategy for external spell requests.
+- [ ] Add character detail section for spells (below Notes).
+- [ ] Build spell search UI on character detail page (search input + results list).
+- [ ] Add action to attach selected spell(s) from API to the current character.
+- [ ] Store attached spell metadata for each character (name, level, school, range, casting time, description, API index/url).
+- [ ] Render attached spells as spell cards on the character detail page.
+- [ ] Add remove/unlink spell action from character.
+- [ ] Prevent duplicate spell attachments per character.
+- [ ] Add robust fallback UX when spell API is unavailable (error state + retry/manual note).
 
 ## 9) AI Character Summary
 
@@ -120,7 +125,7 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [ ] Add unit tests for validation and mapping logic.
 - [ ] Add unit tests for search/filter query helpers.
 - [ ] Add tests for AI prompt builder and response parser.
-- [ ] Add tests for D&D API mapping layer (mock external responses).
+- [ ] Add tests for spell search + spell attachment flow (mock D&D API responses).
 - [ ] Add integration tests for protected character CRUD paths.
 - [ ] Add tests for bookmarks behavior and permissions.
 - [ ] Add at least one end-to-end path for create -> view -> bookmark.
@@ -137,15 +142,15 @@ This checklist assumes the current Supabase auth starter is already in place.
 
 - [ ] Document schema and RLS decisions.
 - [x] Document local vs remote Supabase workflows.
-- [ ] Document Quick Build external API limitations and fallback behavior.
+- [ ] Document spell API limitations, rate limits, and fallback behavior.
 - [ ] Document AI usage, cost controls, and failure fallback.
 - [ ] Document worker/PDF architecture and recovery steps.
 
 ## 15) Suggested Delivery Order (MVP First)
 
 - [x] Milestone 1: Remote Supabase + schema + RLS + character CRUD.
-- [ ] Milestone 2: Search/filter + bookmarks.
-- [ ] Milestone 3: Quick Build integration (manual fallback retained).
+- [x] Milestone 2: Search/filter + bookmarks.
+- [ ] Milestone 3: Spell search + attach flow via D&D API (manual fallback retained).
 - [ ] Milestone 4: AI summary generation (manual fallback retained).
 - [ ] Milestone 5: PDF worker pipeline + downloadable exports.
 - [ ] Milestone 6: Hardening, tests, and deployment polish.

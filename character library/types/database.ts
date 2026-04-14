@@ -109,6 +109,56 @@ export interface Database {
           created_at?: string
         }
       }
+      character_spells: {
+        Row: {
+          id: string
+          character_id: string
+          spell_index: string
+          name: string
+          level: number
+          school: string | null
+          casting_time: string | null
+          range: string | null
+          duration: string | null
+          ritual: boolean
+          concentration: boolean
+          description: string | null
+          api_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          character_id: string
+          spell_index: string
+          name: string
+          level?: number
+          school?: string | null
+          casting_time?: string | null
+          range?: string | null
+          duration?: string | null
+          ritual?: boolean
+          concentration?: boolean
+          description?: string | null
+          api_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          character_id?: string
+          spell_index?: string
+          name?: string
+          level?: number
+          school?: string | null
+          casting_time?: string | null
+          range?: string | null
+          duration?: string | null
+          ritual?: boolean
+          concentration?: boolean
+          description?: string | null
+          api_url?: string | null
+          created_at?: string
+        }
+      }
       bookmarks: {
         Row: {
           id: string

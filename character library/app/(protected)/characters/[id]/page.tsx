@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DeleteCharacterForm } from '@/components/characters/DeleteCharacterForm'
 import { BookmarkButton } from '@/components/characters/BookmarkButton'
+import { CharacterSpellsSection } from '@/components/characters/CharacterSpellsSection'
 
 interface CharacterTagRow {
   tag_id: number
@@ -15,6 +16,21 @@ interface CharacterImageRow {
   image_url: string
   alt_text: string | null
   sort_order: number
+}
+
+interface CharacterSpellRow {
+  id: string
+  spell_index: string
+  name: string
+  level: number
+  school: string | null
+  casting_time: string | null
+  range: string | null
+  duration: string | null
+  ritual: boolean
+  concentration: boolean
+  description: string | null
+  api_url: string | null
 }
 
 export default async function CharacterDetailPage({
@@ -56,12 +72,21 @@ export default async function CharacterDetailPage({
     .eq('character_id', id)
     .order('sort_order', { ascending: true })
 
+  const { data: spellRows } = await supabase
+    .from('character_spells')
+    .select(
+      'id, spell_index, name, level, school, casting_time, range, duration, ritual, concentration, description, api_url'
+    )
+    .eq('character_id', id)
+    .order('created_at', { ascending: false })
+
   const tags = ((tagRows ?? []) as CharacterTagRow[])
     .flatMap((row) => row.tags ?? [])
     .map((tag) => tag.name)
     .filter((name): name is string => Boolean(name))
 
   const images = (imageRows ?? []) as CharacterImageRow[]
+  const spells = (spellRows ?? []) as CharacterSpellRow[]
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -158,6 +183,8 @@ export default async function CharacterDetailPage({
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Notes</h2>
           <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{character.notes || 'No notes yet.'}</p>
         </section>
+
+        <CharacterSpellsSection characterId={character.id} isOwner={isOwner} initialSpells={spells} />
 
         {isOwner && (
           <div className="pt-2">
