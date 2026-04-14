@@ -30,12 +30,6 @@ export default async function ProtectedLayout({
                 Dashboard
               </Link>
               <Link
-                href="/characters"
-                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                Characters
-              </Link>
-              <Link
                 href="/profile"
                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >

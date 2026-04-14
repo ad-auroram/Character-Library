@@ -1,5 +1,20 @@
 import { createClient } from '@/lib/supabase/server';
-import Link from 'next/link';
+import { PublicCharactersSection } from '@/components/characters/PublicCharactersSection';
+
+interface PublicCharacter {
+  id: string;
+  name: string;
+  role: string | null;
+  is_public: boolean;
+  updated_at: string;
+  avatar_url?: string;
+  tags: string[];
+}
+
+interface CharacterTagRow {
+  character_id: string;
+  tags: { name: string } | { name: string }[] | null;
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -8,6 +23,64 @@ export default async function DashboardPage() {
     .from('characters')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user?.id ?? '');
+
+  const { data: publicCharactersData, error: publicCharactersError } = await supabase
+    .from('characters')
+    .select('id, name, role, is_public, updated_at')
+    .eq('is_public', true)
+    .order('updated_at', { ascending: false });
+
+  if (publicCharactersError) {
+    throw new Error(publicCharactersError.message);
+  }
+
+  const publicCharacters: PublicCharacter[] = (publicCharactersData ?? []).map((character) => ({
+    ...character,
+    tags: [],
+  }));
+
+  if (publicCharacters.length > 0) {
+    const characterIds = publicCharacters.map((character) => character.id);
+    const { data: imageRows } = await supabase
+      .from('character_images')
+      .select('character_id, image_url, sort_order')
+      .in('character_id', characterIds)
+      .order('sort_order', { ascending: true });
+
+    const firstImageByCharacter = new Map<string, string>();
+    for (const row of imageRows ?? []) {
+      if (!firstImageByCharacter.has(row.character_id)) {
+        firstImageByCharacter.set(row.character_id, row.image_url);
+      }
+    }
+
+    for (const character of publicCharacters) {
+      character.avatar_url = firstImageByCharacter.get(character.id);
+    }
+
+    const { data: tagRows } = await supabase
+      .from('character_tags')
+      .select('character_id, tags(name)')
+      .in('character_id', characterIds);
+
+    const tagsByCharacter = new Map<string, string[]>();
+    for (const row of (tagRows ?? []) as CharacterTagRow[]) {
+      const tagRecords = Array.isArray(row.tags)
+        ? row.tags
+        : row.tags
+          ? [row.tags]
+          : [];
+      const names = tagRecords.map((tag) => tag.name).filter(Boolean);
+      if (names.length > 0) {
+        const existing = tagsByCharacter.get(row.character_id) ?? [];
+        tagsByCharacter.set(row.character_id, [...existing, ...names]);
+      }
+    }
+
+    for (const character of publicCharacters) {
+      character.tags = tagsByCharacter.get(character.id) ?? [];
+    }
+  }
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -18,14 +91,6 @@ export default async function DashboardPage() {
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Welcome back, {user?.user_metadata?.full_name || user?.email}!
         </p>
-        <div className="mb-6">
-          <Link
-            href="/characters"
-            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
-          >
-            Open Character Library
-          </Link>
-        </div>
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <div className="bg-emerald-50 dark:bg-emerald-900/20 overflow-hidden rounded-lg">
             <div className="p-5">
@@ -89,6 +154,8 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <PublicCharactersSection characters={publicCharacters} />
       </div>
     </div>
   );

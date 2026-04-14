@@ -1,8 +1,45 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { CharacterInfoCard } from '@/components/characters/CharacterInfoCard';
 import type { User } from '@supabase/supabase-js';
+
+interface CharacterListItem {
+  id: string;
+  name: string;
+  role: string | null;
+  is_public: boolean;
+  updated_at: string;
+  avatar_url?: string;
+}
+
+function formatTimeAgo(isoTimestamp: string | null | undefined): string {
+  if (!isoTimestamp) return 'N/A';
+
+  const timestamp = new Date(isoTimestamp).getTime();
+  if (Number.isNaN(timestamp)) return 'N/A';
+
+  const now = Date.now();
+  const diffMs = Math.max(0, now - timestamp);
+  const minutes = Math.floor(diffMs / 60000);
+
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+
+  const years = Math.floor(days / 365);
+  return `${years} year${years === 1 ? '' : 's'} ago`;
+}
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,6 +49,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
   
   // Form state
   const [fullName, setFullName] = useState('');
@@ -32,6 +70,38 @@ export default function ProfilePage() {
           
           setFullName(fullNameFromMeta);
           setAvatarUrl(avatarUrlFromMeta);
+
+          const { data: charactersData, error: charactersError } = await supabase
+            .from('characters')
+            .select('id, name, role, is_public, updated_at')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false });
+
+          if (charactersError) throw charactersError;
+
+          const items: CharacterListItem[] = charactersData ?? [];
+
+          if (items.length > 0) {
+            const characterIds = items.map((item) => item.id);
+            const { data: imageRows } = await supabase
+              .from('character_images')
+              .select('character_id, image_url, sort_order')
+              .in('character_id', characterIds)
+              .order('sort_order', { ascending: true });
+
+            const firstImageByCharacter = new Map<string, string>();
+            for (const row of imageRows ?? []) {
+              if (!firstImageByCharacter.has(row.character_id)) {
+                firstImageByCharacter.set(row.character_id, row.image_url);
+              }
+            }
+
+            for (const item of items) {
+              item.avatar_url = firstImageByCharacter.get(item.id);
+            }
+          }
+
+          setCharacters(items);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -282,15 +352,6 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      User ID
-                    </label>
-                    <div className="text-gray-900 dark:text-white font-mono text-sm bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                      {user?.id}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Created At
                     </label>
                     <div className="text-gray-900 dark:text-white">
@@ -303,10 +364,50 @@ export default function ProfilePage() {
                       Last Sign In
                     </label>
                     <div className="text-gray-900 dark:text-white">
-                      {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'N/A'}
+                      {formatTimeAgo(user?.last_sign_in_at)}
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div id="characters" className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Your Characters
+                  </h3>
+                  <Link
+                    href="/characters/new"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+                  >
+                    New Character
+                  </Link>
+                </div>
+
+                {characters.length === 0 ? (
+                  <div className="rounded-md border border-dashed border-gray-300 dark:border-gray-700 p-6 text-center">
+                    <p className="text-gray-600 dark:text-gray-400 mb-3">No characters yet.</p>
+                    <Link
+                      href="/characters/new"
+                      className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+                    >
+                      Create Character
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {characters.map((character) => (
+                      <CharacterInfoCard
+                        key={character.id}
+                        id={character.id}
+                        name={character.name}
+                        role={character.role}
+                        updatedAt={character.updated_at}
+                        isPublic={character.is_public}
+                        avatarUrl={character.avatar_url}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
