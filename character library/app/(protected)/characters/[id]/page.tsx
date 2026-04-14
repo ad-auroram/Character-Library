@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DeleteCharacterForm } from '@/components/characters/DeleteCharacterForm'
+import { BookmarkButton } from '@/components/characters/BookmarkButton'
 
 interface CharacterTagRow {
   tag_id: number
@@ -72,6 +73,7 @@ export default async function CharacterDetailPage({
           </div>
 
           <div className="flex items-center gap-3">
+            <BookmarkButton characterId={character.id} />
             <Link href="/characters" className="text-sm text-gray-600 dark:text-gray-300 hover:underline">
               Back
             </Link>

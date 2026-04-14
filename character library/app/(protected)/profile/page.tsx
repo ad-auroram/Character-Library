@@ -3,43 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
-import { CharacterInfoCard } from '@/components/characters/CharacterInfoCard';
+import { CharactersTab } from '@/components/profile/CharactersTab';
+import { BookmarksTab } from '@/components/profile/BookmarksTab';
+import { Alert } from '@/components/ui/Alert';
+import { formatRelativeTime } from '@/utils/format';
+import { AvatarFallbackSVG, BROKEN_IMAGE_FALLBACK } from '@/lib/svg-constants';
 import type { User } from '@supabase/supabase-js';
 
-interface CharacterListItem {
-  id: string;
-  name: string;
-  role: string | null;
-  is_public: boolean;
-  updated_at: string;
-  avatar_url?: string;
-}
-
-function formatTimeAgo(isoTimestamp: string | null | undefined): string {
-  if (!isoTimestamp) return 'N/A';
-
-  const timestamp = new Date(isoTimestamp).getTime();
-  if (Number.isNaN(timestamp)) return 'N/A';
-
-  const now = Date.now();
-  const diffMs = Math.max(0, now - timestamp);
-  const minutes = Math.floor(diffMs / 60000);
-
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
-
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
-
-  const years = Math.floor(days / 365);
-  return `${years} year${years === 1 ? '' : 's'} ago`;
-}
+type TabType = 'characters' | 'bookmarks';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -49,7 +20,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>('characters');
   
   // Form state
   const [fullName, setFullName] = useState('');
@@ -70,38 +41,6 @@ export default function ProfilePage() {
           
           setFullName(fullNameFromMeta);
           setAvatarUrl(avatarUrlFromMeta);
-
-          const { data: charactersData, error: charactersError } = await supabase
-            .from('characters')
-            .select('id, name, role, is_public, updated_at')
-            .eq('user_id', user.id)
-            .order('updated_at', { ascending: false });
-
-          if (charactersError) throw charactersError;
-
-          const items: CharacterListItem[] = charactersData ?? [];
-
-          if (items.length > 0) {
-            const characterIds = items.map((item) => item.id);
-            const { data: imageRows } = await supabase
-              .from('character_images')
-              .select('character_id, image_url, sort_order')
-              .in('character_id', characterIds)
-              .order('sort_order', { ascending: true });
-
-            const firstImageByCharacter = new Map<string, string>();
-            for (const row of imageRows ?? []) {
-              if (!firstImageByCharacter.has(row.character_id)) {
-                firstImageByCharacter.set(row.character_id, row.image_url);
-              }
-            }
-
-            for (const item of items) {
-              item.avatar_url = firstImageByCharacter.get(item.id);
-            }
-          }
-
-          setCharacters(items);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -176,8 +115,8 @@ export default function ProfilePage() {
 
   if (error || !user) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
-        {error || 'Failed to load profile'}
+      <div className="px-4 py-6 sm:px-0">
+        <Alert type="error" message={error || 'Failed to load profile'} />
       </div>
     );
   }
@@ -201,16 +140,10 @@ export default function ProfilePage() {
           </div>
 
           {saveSuccess && (
-            <div className="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded">
-              Profile updated successfully!
-            </div>
+            <Alert type="success" message="Profile updated successfully!" />
           )}
 
-          {saveError && (
-            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
-              {saveError}
-            </div>
-          )}
+          {saveError && <Alert type="error" message={saveError} />}
 
           {isEditing ? (
             // Edit Form
@@ -225,17 +158,11 @@ export default function ProfilePage() {
                         alt="Profile"
                         className="h-full w-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23D1D5DB%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E';
+                          e.currentTarget.src = BROKEN_IMAGE_FALLBACK;
                         }}
                       />
                     ) : (
-                      <svg
-                        className="h-full w-full text-gray-400 p-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
+                      <AvatarFallbackSVG />
                     )}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -316,13 +243,7 @@ export default function ProfilePage() {
                         }}
                       />
                     ) : (
-                      <svg
-                        className="h-full w-full text-gray-400 p-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
+                      <AvatarFallbackSVG />
                     )}
                   </div>
                 </div>
@@ -364,49 +285,57 @@ export default function ProfilePage() {
                       Last Sign In
                     </label>
                     <div className="text-gray-900 dark:text-white">
-                      {formatTimeAgo(user?.last_sign_in_at)}
+                      {user?.last_sign_in_at ? formatRelativeTime(user.last_sign_in_at) : 'N/A'}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div id="characters" className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <div className="flex items-center justify-between mb-4">
+              <div id="library" className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Your Characters
+                    Library
                   </h3>
-                  <Link
-                    href="/characters/new"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
-                  >
-                    New Character
-                  </Link>
-                </div>
-
-                {characters.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-gray-300 dark:border-gray-700 p-6 text-center">
-                    <p className="text-gray-600 dark:text-gray-400 mb-3">No characters yet.</p>
+                  {activeTab === 'characters' && (
                     <Link
                       href="/characters/new"
-                      className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
                     >
-                      Create Character
+                      New Character
                     </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {characters.map((character) => (
-                      <CharacterInfoCard
-                        key={character.id}
-                        id={character.id}
-                        name={character.name}
-                        role={character.role}
-                        updatedAt={character.updated_at}
-                        isPublic={character.is_public}
-                        avatarUrl={character.avatar_url}
-                      />
-                    ))}
-                  </div>
+                  )}
+                </div>
+
+                {/* Tab Controls */}
+                <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => setActiveTab('characters')}
+                    className={`px-4 py-2 font-medium transition border-b-2 ${
+                      activeTab === 'characters'
+                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Your Characters
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('bookmarks')}
+                    className={`px-4 py-2 font-medium transition border-b-2 ${
+                      activeTab === 'bookmarks'
+                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Bookmarks
+                  </button>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === 'characters' && user && (
+                  <CharactersTab userId={user.id} />
+                )}
+                {activeTab === 'bookmarks' && (
+                  <BookmarksTab />
                 )}
               </div>
             </div>

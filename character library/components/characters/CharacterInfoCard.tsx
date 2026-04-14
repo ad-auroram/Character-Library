@@ -10,7 +10,6 @@ interface CharacterInfoCardProps {
   isPublic?: boolean;
   avatarUrl?: string;
   showVisibility?: boolean;
-  showEditLink?: boolean;
   avatarSizeClassName?: string;
 }
 
@@ -22,7 +21,6 @@ export function CharacterInfoCard({
   isPublic,
   avatarUrl,
   showVisibility = true,
-  showEditLink = true,
   avatarSizeClassName = 'h-28 w-28',
 }: CharacterInfoCardProps) {
   return (
@@ -62,11 +60,6 @@ export function CharacterInfoCard({
           <Link href={`/characters/${id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
             View
           </Link>
-          {showEditLink && (
-            <Link href={`/characters/${id}/edit`} className="text-gray-700 dark:text-gray-300 hover:underline">
-              Edit
-            </Link>
-          )}
         </div>
       </div>
     </article>

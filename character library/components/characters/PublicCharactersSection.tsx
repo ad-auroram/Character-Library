@@ -69,7 +69,6 @@ export function PublicCharactersSection({ characters }: PublicCharactersSectionP
               isPublic={character.is_public}
               avatarUrl={character.avatar_url}
               showVisibility={false}
-              showEditLink={false}
             />
           ))}
         </div>
