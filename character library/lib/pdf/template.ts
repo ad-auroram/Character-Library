@@ -114,14 +114,15 @@ export function buildCharacterPdfHtml(character: PdfCharacterData): string {
         .spell-group { margin-bottom: 18px; }
         .spell-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
         }
         .spell-card {
           border: 1px solid #d1d5db;
           border-radius: 6px;
-          padding: 8px;
+          padding: 10px;
           break-inside: avoid;
+          font-size: 11px;
         }
         .meta { font-size: 12px; color: #6b7280; }
         .description { white-space: pre-wrap; font-size: 12px; margin-top: 6px; }
