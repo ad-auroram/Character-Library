@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   addCharacterSpellAction,
   removeCharacterSpellAction,
@@ -8,6 +8,8 @@ import {
   type CharacterSpell,
 } from '@/app/(protected)/characters/spell-actions'
 import type { DndSpellSearchResult } from '@/lib/dnd/spells'
+
+const SPELL_SEARCH_PAGE_SIZE = 8
 
 interface CharacterSpellsSectionProps {
   characterId: string
@@ -26,6 +28,9 @@ export function CharacterSpellsSection({
 }: CharacterSpellsSectionProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<DndSpellSearchResult[]>([])
+  const [resultTotal, setResultTotal] = useState(0)
+  const [resultPage, setResultPage] = useState(1)
+  const [resultTotalPages, setResultTotalPages] = useState(0)
   const [spells, setSpells] = useState<CharacterSpell[]>(initialSpells)
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
@@ -38,28 +43,52 @@ export function CharacterSpellsSection({
     [spells]
   )
 
-  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setSearchError(null)
-    setActionError(null)
+  useEffect(() => {
+    const trimmedQuery = query.trim()
+    let cancelled = false
 
-    if (query.trim().length < 2) {
+    if (trimmedQuery.length < 2) {
       setResults([])
-      setSearchError('Type at least 2 characters to search spells.')
+      setResultTotal(0)
+      setResultTotalPages(0)
+      setSearchError(null)
+      setIsSearching(false)
       return
     }
 
+    setSearchError(null)
+    setActionError(null)
     setIsSearching(true)
-    try {
-      const data = await searchSpellsAction(query)
-      setResults(data)
-    } catch (error) {
-      setResults([])
-      setSearchError(error instanceof Error ? error.message : 'Failed to search spells.')
-    } finally {
-      setIsSearching(false)
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const data = await searchSpellsAction(
+          trimmedQuery,
+          resultPage,
+          SPELL_SEARCH_PAGE_SIZE
+        )
+        if (cancelled) return
+        setResults(data.items)
+        setResultTotal(data.total)
+        setResultPage(data.page)
+        setResultTotalPages(data.totalPages)
+      } catch (error) {
+        if (cancelled) return
+        setResults([])
+        setResultTotal(0)
+        setResultTotalPages(0)
+        setSearchError(error instanceof Error ? error.message : 'Failed to search spells.')
+      } finally {
+        if (cancelled) return
+        setIsSearching(false)
+      }
+    }, 300)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
     }
-  }
+  }, [query, resultPage])
 
   const handleAddSpell = async (spellIndex: string) => {
     setActionError(null)
@@ -104,29 +133,38 @@ export function CharacterSpellsSection({
 
       {isOwner && (
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-3">
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="flex gap-2">
             <input
               type="text"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value)
+                setResultPage(1)
+              }}
               placeholder="Search spells from D&D API..."
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
-            <button
-              type="submit"
-              disabled={isSearching}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSearching ? 'Searching...' : 'Search'}
-            </button>
-          </form>
+          </div>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Search updates automatically after you pause typing.
+          </p>
 
           {searchError && (
             <p className="text-sm text-red-600 dark:text-red-400">{searchError}</p>
           )}
 
           {results.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>
+                  Showing {results.length} of {resultTotal} result{resultTotal === 1 ? '' : 's'}
+                </span>
+                <span>
+                  Page {resultPage} of {resultTotalPages}
+                </span>
+              </div>
+
               {results.map((spell) => {
                 const alreadyAttached = attachedSpellIndexes.has(spell.index)
                 const isAdding = addingSpellIndex === spell.index
@@ -148,6 +186,28 @@ export function CharacterSpellsSection({
                   </div>
                 )
               })}
+
+              {resultTotalPages > 1 && (
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setResultPage((current) => Math.max(1, current - 1))}
+                    disabled={isSearching || resultPage <= 1}
+                    className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setResultPage((current) => current + 1)}
+                    disabled={isSearching || resultPage >= resultTotalPages}
+                    className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

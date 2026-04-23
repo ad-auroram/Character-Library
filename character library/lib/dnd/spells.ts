@@ -4,6 +4,14 @@ export interface DndSpellSearchResult {
   url: string
 }
 
+export interface DndSpellSearchPage {
+  items: DndSpellSearchResult[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface DndSpellDetail {
   index: string
   name: string
@@ -16,6 +24,7 @@ export interface DndSpellDetail {
   concentration: boolean
   desc: string[]
   url: string | null
+  classes: string[]
 }
 
 const DND_API_BASE_URL = 'https://www.dnd5eapi.co'
@@ -36,26 +45,85 @@ interface DndSpellDetailResponse {
   concentration?: boolean
   desc?: string[]
   url?: string
+  classes?: Array<{ name?: string }>
 }
 
-export async function searchDndSpells(query: string, limit = 12): Promise<DndSpellSearchResult[]> {
-  const cleaned = query.trim().toLowerCase()
-  if (!cleaned) return []
+interface DndSpellCatalogEntry {
+  index: string
+  name: string
+  url: string
+  classes: string[]
+}
 
-  const response = await fetch(`${DND_API_BASE_URL}/api/spells`, {
-    next: { revalidate: 3600 },
-  })
+let spellCatalogPromise: Promise<DndSpellCatalogEntry[]> | null = null
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch spells from D&D API.')
+async function getSpellCatalog(): Promise<DndSpellCatalogEntry[]> {
+  if (!spellCatalogPromise) {
+    spellCatalogPromise = (async () => {
+      const response = await fetch(`${DND_API_BASE_URL}/api/spells`, {
+        next: { revalidate: 3600 },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch spells from D&D API.')
+      }
+
+      const data = (await response.json()) as DndSpellListResponse
+      const summaries = data.results ?? []
+
+      const detailedSpells = await Promise.all(
+        summaries.map(async (spell) => {
+          const detail = await getDndSpellByIndex(spell.index)
+          return {
+            index: detail.index,
+            name: detail.name,
+            url: detail.url ?? spell.url,
+            classes: detail.classes,
+          }
+        })
+      )
+
+      return detailedSpells
+    })()
   }
 
-  const data = (await response.json()) as DndSpellListResponse
-  const results = data.results ?? []
+  return spellCatalogPromise
+}
 
-  return results
-    .filter((spell) => spell.name.toLowerCase().includes(cleaned))
-    .slice(0, limit)
+export async function searchDndSpells(
+  query: string,
+  page = 1,
+  pageSize = 10
+): Promise<DndSpellSearchPage> {
+  const cleaned = query.trim().toLowerCase()
+  if (!cleaned) {
+    return { items: [], total: 0, page, pageSize, totalPages: 0 }
+  }
+
+  const catalog = await getSpellCatalog()
+
+  const matchingSpells = catalog
+    .filter((spell) => {
+      const nameMatches = spell.name.toLowerCase().includes(cleaned)
+      const classMatches = spell.classes.some((className) =>
+        className.toLowerCase().includes(cleaned)
+      )
+
+      return nameMatches || classMatches
+    })
+
+  const total = matchingSpells.length
+  const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize)
+  const safePage = Math.min(Math.max(page, 1), Math.max(totalPages, 1))
+  const startIndex = (safePage - 1) * pageSize
+
+  return {
+    items: matchingSpells.slice(startIndex, startIndex + pageSize),
+    total,
+    page: safePage,
+    pageSize,
+    totalPages,
+  }
 }
 
 export async function getDndSpellByIndex(spellIndex: string): Promise<DndSpellDetail> {
@@ -84,5 +152,8 @@ export async function getDndSpellByIndex(spellIndex: string): Promise<DndSpellDe
     concentration: Boolean(data.concentration),
     desc: data.desc ?? [],
     url: data.url ?? null,
+    classes: (data.classes ?? [])
+      .map((spellClass) => spellClass.name)
+      .filter((name): name is string => Boolean(name)),
   }
 }

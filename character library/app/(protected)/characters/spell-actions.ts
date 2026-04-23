@@ -2,7 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { getDndSpellByIndex, searchDndSpells, type DndSpellSearchResult } from '@/lib/dnd/spells'
+import {
+  getDndSpellByIndex,
+  searchDndSpells,
+  type DndSpellSearchPage,
+} from '@/lib/dnd/spells'
 
 export interface CharacterSpell {
   id: string
@@ -49,13 +53,17 @@ async function requireOwnedCharacter(characterId: string) {
   return { supabase }
 }
 
-export async function searchSpellsAction(query: string): Promise<DndSpellSearchResult[]> {
+export async function searchSpellsAction(
+  query: string,
+  page = 1,
+  pageSize = 10
+): Promise<DndSpellSearchPage> {
   const cleaned = query.trim()
   if (cleaned.length < 2) {
-    return []
+    return { items: [], total: 0, page, pageSize, totalPages: 0 }
   }
 
-  return searchDndSpells(cleaned)
+  return searchDndSpells(cleaned, page, pageSize)
 }
 
 export async function addCharacterSpellAction(characterId: string, spellIndex: string): Promise<SpellActionResult> {
