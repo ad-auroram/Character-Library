@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "worker:pdf": "node workers/pdf-export-worker.js",
+    "worker:pdf:local": "node --env-file=.env.local workers/pdf-export-worker.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -14,7 +16,10 @@
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
+    "bullmq": "^5.76.1",
+    "ioredis": "^5.10.1",
     "next": "16.1.6",
+    "puppeteer": "^24.42.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

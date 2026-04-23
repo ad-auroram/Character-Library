@@ -237,6 +237,10 @@ For server-side operations outside this starter's defaults, you may also configu
 
 - `SUPABASE_SERVICE_ROLE_KEY` (never expose as `NEXT_PUBLIC_*`)
 
+For PDF export background jobs, see:
+
+- `docs/pdf-export-deployment.md`
+
 ### Database Migrations in Production
 
 ```bash

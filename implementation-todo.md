@@ -23,8 +23,8 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [x] Create migration(s) for `tags` table.
 - [x] Create migration(s) for `character_tags` join table.
 - [x] Create migration(s) for `character_images` table (gallery metadata, ordering, URLs).
-- [ ] Create migration(s) for `bookmarks` table (`user_id`, `character_id`, unique constraint).
-- [ ] Create migration(s) for `character_spells` table (`character_id`, spell metadata from API, unique per character+spell index/id).
+- [x] Create migration(s) for `bookmarks` table (`user_id`, `character_id`, unique constraint).
+- [x] Create migration(s) for `character_spells` table (`character_id`, spell metadata from API, unique per character+spell index/id).
 - [x] Add indexes for expected queries:
   - [x] owner + updated date
   - [x] visibility + updated date
@@ -48,8 +48,8 @@ This checklist assumes the current Supabase auth starter is already in place.
   - [x] Character DTO/form model
   - [x] Tag model
   - [x] Image model
-  - [ ] Bookmark model
-  - [ ] Spell model (API response + persisted character spell shape)
+  - [x] Bookmark model
+  - [x] Spell model (API response + persisted character spell shape)
 - [x] Keep client/server payload types aligned to avoid runtime shape mismatches.
 
 ## 5) Character CRUD (Core Feature)
@@ -79,15 +79,15 @@ This checklist assumes the current Supabase auth starter is already in place.
 
 ## 8) Spell Integration (D&D 5e API)
 
-- [ ] Build a service module for D&D API spell search and spell detail calls.
+- [x] Build a service module for D&D API spell search and spell detail calls.
 - [ ] Add caching/throttling strategy for external spell requests.
-- [ ] Add character detail section for spells (below Notes).
-- [ ] Build spell search UI on character detail page (search input + results list).
-- [ ] Add action to attach selected spell(s) from API to the current character.
-- [ ] Store attached spell metadata for each character (name, level, school, range, casting time, description, API index/url).
-- [ ] Render attached spells as spell cards on the character detail page.
-- [ ] Add remove/unlink spell action from character.
-- [ ] Prevent duplicate spell attachments per character.
+- [x] Add character detail section for spells (below Notes).
+- [x] Build spell search UI on character detail page (search input + results list).
+- [x] Add action to attach selected spell(s) from API to the current character.
+- [x] Store attached spell metadata for each character (name, level, school, range, casting time, description, API index/url).
+- [x] Render attached spells as spell cards on the character detail page.
+- [x] Add remove/unlink spell action from character.
+- [x] Prevent duplicate spell attachments per character.
 - [ ] Add robust fallback UX when spell API is unavailable (error state + retry/manual note).
 
 ## 9) AI Character Summary
@@ -154,3 +154,10 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [ ] Milestone 4: AI summary generation (manual fallback retained).
 - [ ] Milestone 5: PDF worker pipeline + downloadable exports.
 - [ ] Milestone 6: Hardening, tests, and deployment polish.
+
+## 16) Partial Implementation Notes
+
+- Spell integration is functionally live for search, pagination, class-based matching, attach/remove, and card rendering on character detail pages.
+- Spell API requests currently use response revalidation caching, but explicit throttling/rate-limit controls are not yet implemented.
+- Spell error handling currently shows user-facing error states, but a full fallback flow (retry strategy + manual entry alternative) is still pending.
+- Milestone 3 is intentionally left open until caching/throttling and fallback UX are completed.

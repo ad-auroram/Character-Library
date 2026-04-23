@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DeleteCharacterForm } from '@/components/characters/DeleteCharacterForm'
 import { BookmarkButton } from '@/components/characters/BookmarkButton'
 import { CharacterSpellsSection } from '@/components/characters/CharacterSpellsSection'
+import { CharacterExportSection } from '@/components/characters/CharacterExportSection'
 
 interface CharacterTagRow {
   tag_id: number
@@ -185,6 +186,8 @@ export default async function CharacterDetailPage({
         </section>
 
         <CharacterSpellsSection characterId={character.id} isOwner={isOwner} initialSpells={spells} />
+
+        {isOwner && <CharacterExportSection characterId={character.id} />}
 
         {isOwner && (
           <div className="pt-2">

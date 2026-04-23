@@ -159,6 +159,38 @@ export interface Database {
           created_at?: string
         }
       }
+      character_exports: {
+        Row: {
+          id: string
+          character_id: string
+          user_id: string
+          status: string
+          storage_path: string | null
+          error_message: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          character_id: string
+          user_id: string
+          status: string
+          storage_path?: string | null
+          error_message?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          character_id?: string
+          user_id?: string
+          status?: string
+          storage_path?: string | null
+          error_message?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       bookmarks: {
         Row: {
           id: string
