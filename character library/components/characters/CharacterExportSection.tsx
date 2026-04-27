@@ -41,7 +41,7 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
       if (result.status === 'failed') {
         setError('Export failed. Please try again.')
       }
-    }, 3000)
+    }, 30000)
 
     return () => {
       cancelled = true
