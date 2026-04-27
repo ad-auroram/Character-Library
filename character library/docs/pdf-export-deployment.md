@@ -68,18 +68,22 @@ Why `REDIS_URL` on Vercel:
 Create and configure a dedicated worker service in Railway:
 
 1. In Railway, click **New Project** -> **Deploy from GitHub repo**.
-2. Select this repository.
-3. Open the new service, then set the **Root Directory** to `character library`.
-4. In the service settings, set:
-   - Build command: `npm ci`
+2. Select this repository (Character-Library).
+3. Open the new service settings.
+4. Find **Root Directory** and set it to:
+   - If GitHub repo root is the "Character-Library" folder: set to `character library`
+   - If GitHub repo root is one level above (contains "Character-Library" folder): set to `Character-Library/character library`
+5. In **Build** and **Deploy** settings, confirm or set:
+   - Build command: `npm install` (or `npm ci` for production)
    - Start command: `npm run worker:pdf`
-5. In the service variables, add:
+   - (Leave Port empty; this is a background worker, not HTTP server)
+6. In **Variables**, add these environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `REDIS_URL`
    - `NODE_ENV=production`
-6. Deploy the service and open the logs.
-7. Confirm you see the worker startup line:
+7. Click **Deploy** and wait for the build to complete.
+8. Once deployment finishes, open **Logs** and confirm you see:
    - `[pdf-worker] running and waiting for jobs...`
 
 Required variables:
@@ -153,6 +157,19 @@ You can host this on Railway cron, GitHub Actions cron, or Supabase scheduled fu
 - Verify `SUPABASE_SERVICE_ROLE_KEY` on Railway.
 - Check worker logs for missing env vars.
 - Confirm migration was applied (`character_exports` table exists).
+
+### "Script start.sh not found" or Railpack build error
+
+This means Railway cannot detect the Node.js project. Fix it:
+
+1. Verify the **Root Directory** setting in Railway service settings.
+   - It should point to the folder containing `package.json` (i.e., the "character library" folder).
+   - Correct values are `character library` or `Character-Library/character library` depending on your repo structure.
+2. Clear any custom build command and use auto-detect or set:
+   - Build: `npm install`
+   - Start: `npm run worker:pdf`
+3. Confirm your GitHub repo contains `package.json` in the correct location.
+4. After fixing Root Directory, redeploy the service.
 
 ### No download link
 

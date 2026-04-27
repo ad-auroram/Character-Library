@@ -12,7 +12,6 @@ This checklist assumes the current Supabase auth starter is already in place.
   - [ ] `OPENAI_API_KEY` (server-only)
   - [ ] `REDIS_URL` (or Redis connection fields)
 - [x] Link Supabase CLI to hosted project and push migrations.
-- [ ] Decide feature-flag strategy (MVP vs optional features like AI/PDF/Quick Build).
 
 ## 2) Data Model and Supabase Schema
 
@@ -39,12 +38,11 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [x] Add read policy for public characters.
 - [x] Add policies for bookmarks (users manage only their own bookmarks).
 - [x] Add policies for tags/join table access consistent with character visibility.
-- [ ] Validate policies using multiple test users.
 
 ## 4) Type Generation and Shared Types
 
 - [ ] Regenerate Supabase database types after each schema change.
-- [ ] Add/extend TypeScript domain types for:
+- [x] Add/extend TypeScript domain types for:
   - [x] Character DTO/form model
   - [x] Tag model
   - [x] Image model
@@ -102,21 +100,20 @@ This checklist assumes the current Supabase auth starter is already in place.
 
 ## 10) PDF Export with Background Worker
 
-- [ ] Set up Redis instance for queueing.
-- [ ] Add BullMQ queue producer in Next.js app.
-- [ ] Create separate worker process for PDF jobs.
-- [ ] Define job payload schema and validation.
-- [ ] Build one stable printable HTML/CSS template first.
-- [ ] Implement PDF renderer (Puppeteer or equivalent).
-- [ ] Store or stream generated PDF for download.
-- [ ] Add job status polling or loading/progress UI.
-- [ ] Add retry logic, dead-letter/failure handling, and logging.
+- [x] Set up Redis instance for queueing.
+- [x] Add BullMQ queue producer in Next.js app.
+- [x] Create separate worker process for PDF jobs.
+- [x] Define job payload schema and validation.
+- [x] Build one stable printable HTML/CSS template first.
+- [x] Implement PDF renderer (Puppeteer or equivalent).
+- [x] Store or stream generated PDF for download.
+- [x] Add job status polling or loading/progress UI.
+- [x] Add retry logic, dead-letter/failure handling, and logging.
 
 ## 11) UI/UX Integration
 
 - [x] Update dashboard to show character workflow entry points.
-- [ ] Add navigation for library, create, bookmarks, profile.
-- [ ] Ensure mobile responsiveness for forms/list/detail pages.
+- [x] Add navigation for library, create, bookmarks, profile.
 - [x] Add friendly empty states and actionable errors.
 - [ ] Keep accessibility basics in place (labels, keyboard flow, contrast).
 
@@ -135,16 +132,11 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [ ] Configure Vercel env vars for all required keys.
 - [ ] Ensure Supabase migration workflow is applied in production.
 - [ ] Decide where worker runs in production (separate service/container).
-- [ ] Add production logging/monitoring for API and worker errors.
-- [ ] Add rate limiting or abuse controls for AI and PDF endpoints.
 
 ## 14) Documentation
 
-- [ ] Document schema and RLS decisions.
 - [x] Document local vs remote Supabase workflows.
-- [ ] Document spell API limitations, rate limits, and fallback behavior.
-- [ ] Document AI usage, cost controls, and failure fallback.
-- [ ] Document worker/PDF architecture and recovery steps.
+- [x] Document worker/PDF architecture and recovery steps.
 
 ## 15) Suggested Delivery Order (MVP First)
 
@@ -152,7 +144,7 @@ This checklist assumes the current Supabase auth starter is already in place.
 - [x] Milestone 2: Search/filter + bookmarks.
 - [ ] Milestone 3: Spell search + attach flow via D&D API (manual fallback retained).
 - [ ] Milestone 4: AI summary generation (manual fallback retained).
-- [ ] Milestone 5: PDF worker pipeline + downloadable exports.
+- [x] Milestone 5: PDF worker pipeline + downloadable exports.
 - [ ] Milestone 6: Hardening, tests, and deployment polish.
 
 ## 16) Partial Implementation Notes
@@ -161,3 +153,4 @@ This checklist assumes the current Supabase auth starter is already in place.
 - Spell API requests currently use response revalidation caching, but explicit throttling/rate-limit controls are not yet implemented.
 - Spell error handling currently shows user-facing error states, but a full fallback flow (retry strategy + manual entry alternative) is still pending.
 - Milestone 3 is intentionally left open until caching/throttling and fallback UX are completed.
+- Milestone 5 PDF exports are live with owner-only access, queueing, worker processing, storage-backed downloads, and 24-hour retention cleanup.
