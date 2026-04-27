@@ -44,7 +44,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
@@ -52,7 +52,7 @@ export default function SignInPage() {
 
       <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
         Don't have an account?{' '}
-        <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:underline">
+        <Link href="/signup" className="text-emerald-600 dark:text-emerald-400 hover:underline">
           Sign up
         </Link>
       </p>

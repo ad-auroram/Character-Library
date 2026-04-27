@@ -112,11 +112,11 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 overflow-hidden rounded-lg">
+          <div className="bg-emerald-50 dark:bg-emerald-900/20 overflow-hidden rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>

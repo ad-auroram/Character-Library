@@ -82,7 +82,7 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
         type="button"
         onClick={handleExport}
         disabled={isWorking}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isWorking ? 'Exporting PDF...' : 'Export Character PDF'}
       </button>
@@ -98,7 +98,7 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
           href={downloadUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          className="inline-block text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
         >
           Download PDF
         </a>

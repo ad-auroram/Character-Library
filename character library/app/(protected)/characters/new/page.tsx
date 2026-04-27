@@ -131,7 +131,7 @@ export default function NewCharacterPage() {
           <div className="flex gap-3">
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-medium transition"
             >
               Create Character
             </button>

@@ -57,7 +57,7 @@ export function CharacterInfoCard({
         </p>
 
         <div className="mt-4 flex gap-3">
-          <Link href={`/characters/${id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+          <Link href={`/characters/${id}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">
             View
           </Link>
         </div>

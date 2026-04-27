@@ -74,7 +74,7 @@ export function BookmarksTab() {
         </p>
         <Link
           href="/dashboard"
-          className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+          className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-medium transition"
         >
           Explore Characters
         </Link>

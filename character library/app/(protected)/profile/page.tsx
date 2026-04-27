@@ -132,7 +132,7 @@ export default function ProfilePage() {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md transition"
               >
                 Edit Profile
               </button>
@@ -182,7 +182,7 @@ export default function ProfilePage() {
                       value={avatarUrl}
                       onChange={(e) => setAvatarUrl(e.target.value)}
                       placeholder="https://example.com/image.jpg"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Enter the full URL of an image you'd like to use as your profile picture
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Enter your full name"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -299,7 +299,7 @@ export default function ProfilePage() {
                   {activeTab === 'characters' && (
                     <Link
                       href="/characters/new"
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-medium transition"
                     >
                       New Character
                     </Link>
@@ -312,7 +312,7 @@ export default function ProfilePage() {
                     onClick={() => setActiveTab('characters')}
                     className={`px-4 py-2 font-medium transition border-b-2 ${
                       activeTab === 'characters'
-                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400'
                         : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -322,7 +322,7 @@ export default function ProfilePage() {
                     onClick={() => setActiveTab('bookmarks')}
                     className={`px-4 py-2 font-medium transition border-b-2 ${
                       activeTab === 'bookmarks'
-                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400'
                         : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >

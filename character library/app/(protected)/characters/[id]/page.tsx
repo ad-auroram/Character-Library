@@ -106,7 +106,7 @@ export default async function CharacterDetailPage({
             {isOwner && (
               <Link
                 href={`/characters/${character.id}/edit`}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-medium transition"
               >
                 Edit
               </Link>
@@ -153,7 +153,7 @@ export default async function CharacterDetailPage({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-1 rounded-full text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  className="px-2 py-1 rounded-full text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
                 >
                   {tag}
                 </span>

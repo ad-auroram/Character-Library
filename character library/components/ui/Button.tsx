@@ -18,7 +18,7 @@ export function Button({
   const baseClasses = 'font-medium rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    primary: 'bg-emerald-600 hover:bg-emerald-700 text-white',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
   };

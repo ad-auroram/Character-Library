@@ -31,7 +31,7 @@ export function Input({
             ? 'border-red-300 dark:border-red-600'
             : 'border-gray-300 dark:border-gray-600'
         } rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 ${
-          error ? 'focus:ring-red-500' : 'focus:ring-blue-500'
+          error ? 'focus:ring-red-500' : 'focus:ring-emerald-500'
         } ${className}`}
         {...props}
       />
