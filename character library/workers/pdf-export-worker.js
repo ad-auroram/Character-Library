@@ -246,7 +246,18 @@ const worker = new Worker(
       throw error
     }
   },
-  { connection }
+  {
+    connection,
+    settings: {
+      lockDuration: 30000,
+      lockRenewTime: 15000,
+      maxStalledCount: 2,
+      stalledInterval: 30000,
+      retryProcessDelay: 5000,
+      guardInterval: 30000,
+      pollInterval: 30000,
+    },
+  }
 )
 
 worker.on('completed', (job) => {
