@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { updateCharacterAction } from '@/app/(protected)/characters/actions'
+import { canGenerateCharacterSummary } from '../../ai-utils'
+import { CharacterSummaryField } from '../../../../../components/characters/CharacterSummaryField'
 
 interface CharacterTagRow {
   tags: {
@@ -19,6 +21,7 @@ export default async function EditCharacterPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const showGenerateSummary = canGenerateCharacterSummary()
   const { id } = await params
   const supabase = await createClient()
   const {
@@ -105,18 +108,7 @@ export default async function EditCharacterPage({
             </div>
           </div>
 
-          <div>
-            <label htmlFor="summary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Summary
-            </label>
-            <textarea
-              id="summary"
-              name="summary"
-              rows={3}
-              defaultValue={character.summary ?? ''}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
+          <CharacterSummaryField initialSummary={character.summary ?? ''} showGenerateSummary={showGenerateSummary} />
 
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
