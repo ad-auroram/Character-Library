@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   getCharacterPdfExportStatusAction,
   requestCharacterPdfExportAction,
@@ -18,13 +18,27 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const attemptsRef = useRef(0)
+  const MAX_ATTEMPTS = 10
+  const [pollingStopped, setPollingStopped] = useState(false)
+
   useEffect(() => {
     if (!exportId || (status !== 'queued' && status !== 'processing')) {
       return
     }
 
     let cancelled = false
-    const interval = window.setInterval(async () => {
+
+    const doPoll = async () => {
+      if (cancelled) return
+
+      attemptsRef.current += 1
+
+      if (attemptsRef.current > MAX_ATTEMPTS) {
+        setPollingStopped(true)
+        return
+      }
+
       const result = await getCharacterPdfExportStatusAction(exportId)
       if (cancelled || !result.success) {
         if (!cancelled && !result.success) {
@@ -41,13 +55,31 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
       if (result.status === 'failed') {
         setError('Export failed. Please try again.')
       }
-    }, 3000)
+    }
+
+    // First poll immediately, then every 30s
+    doPoll()
+    const interval = window.setInterval(doPoll, 30000)
 
     return () => {
       cancelled = true
       window.clearInterval(interval)
     }
   }, [exportId, status])
+
+  const handleManualRefresh = async () => {
+    if (!exportId) return
+    setError(null)
+    const result = await getCharacterPdfExportStatusAction(exportId)
+    if (!result.success) {
+      setError(result.error ?? 'Failed to refresh export status.')
+      return
+    }
+
+    setStatus(result.status ?? null)
+    if (result.downloadUrl) setDownloadUrl(result.downloadUrl)
+    if (result.status === 'failed') setError('Export failed. Please try again.')
+  }
 
   const handleExport = async () => {
     setError(null)
@@ -105,6 +137,19 @@ export function CharacterExportSection({ characterId }: CharacterExportSectionPr
       )}
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+      {pollingStopped && (status === 'queued' || status === 'processing') && (
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          <p>Still processing — automatic checks stopped after 10 attempts.</p>
+          <button
+            type="button"
+            onClick={handleManualRefresh}
+            className="mt-2 inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200"
+          >
+            Refresh status
+          </button>
+        </div>
+      )}
     </section>
   )
 }
