@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
-import { generateCharacterSummaryAction } from '@/app/(protected)/characters/ai-actions'
+import { generateCharacterSummaryAction, type GenerateResult } from '@/app/(protected)/characters/ai-actions'
 
 type CharacterSummaryFieldProps = {
   initialSummary: string
@@ -10,14 +10,28 @@ type CharacterSummaryFieldProps = {
 
 export function CharacterSummaryField({ initialSummary, showGenerateSummary }: CharacterSummaryFieldProps) {
   const [summary, setSummary] = useState(initialSummary)
-  const [generatedSummary, generateSummaryAction, isGenerating] = useActionState(
+  const [message, setMessage] = useState<string | null>(null)
+
+  const initialResult: GenerateResult = { success: true, text: initialSummary }
+
+  const [result, generateSummaryAction, isGenerating] = useActionState(
     generateCharacterSummaryAction,
-    initialSummary
+    initialResult
   )
 
   useEffect(() => {
-    setSummary(generatedSummary)
-  }, [generatedSummary])
+    if (!result) return
+
+    // server action returns a structured GenerateResult
+    const maybe = result as GenerateResult
+    if (maybe && typeof maybe === 'object' && 'text' in maybe) {
+      setSummary(maybe.text)
+      setMessage(maybe.error ?? (maybe.rateLimited ? 'Rate limit reached' : null))
+    } else if (typeof result === 'string') {
+      setSummary(result)
+      setMessage(null)
+    }
+  }, [result])
 
   return (
     <div>
@@ -45,6 +59,7 @@ export function CharacterSummaryField({ initialSummary, showGenerateSummary }: C
           </button>
         </div>
       )}
+      {message && <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">{message}</p>}
     </div>
   )
 }
