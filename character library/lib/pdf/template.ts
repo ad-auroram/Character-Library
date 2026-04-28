@@ -1,3 +1,5 @@
+import { escapeHtml, spellLevelLabel } from '@/lib/shared-utils'
+
 interface PdfCharacterSpell {
   name: string
   level: number
@@ -22,19 +24,6 @@ interface PdfCharacterData {
   wisdom: number
   charisma: number
   spells: PdfCharacterSpell[]
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-function levelLabel(level: number): string {
-  return level === 0 ? 'Cantrips' : `Level ${level}`
 }
 
 export function buildCharacterPdfHtml(character: PdfCharacterData): string {
@@ -76,7 +65,7 @@ export function buildCharacterPdfHtml(character: PdfCharacterData): string {
 
           return `
             <section class="spell-group">
-              <h3>${levelLabel(level)}</h3>
+              <h3>${spellLevelLabel(level)}</h3>
               <div class="spell-grid">${spellCards}</div>
             </section>
           `

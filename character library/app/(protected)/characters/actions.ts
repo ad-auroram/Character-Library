@@ -3,51 +3,13 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-
-const MIN_STAT = 1
-const MAX_STAT = 30
-const DEFAULT_STAT = 10
-
-function parseStat(value: FormDataEntryValue | null): number {
-  if (typeof value !== 'string') return DEFAULT_STAT
-  const parsed = Number.parseInt(value, 10)
-  if (Number.isNaN(parsed)) return DEFAULT_STAT
-  return Math.min(MAX_STAT, Math.max(MIN_STAT, parsed))
-}
-
-function parseTags(raw: string): string[] {
-  const seen = new Set<string>()
-
-  return raw
-    .split(',')
-    .map((tag) => tag.trim().toLowerCase())
-    .filter((tag) => tag.length > 0)
-    .filter((tag) => {
-      if (seen.has(tag)) return false
-      seen.add(tag)
-      return true
-    })
-}
-
-function parseImageUrls(raw: string): string[] {
-  const seen = new Set<string>()
-
-  return raw
-    .split('\n')
-    .map((url) => url.trim())
-    .filter((url) => url.length > 0)
-    .filter((url) => {
-      if (seen.has(url)) return false
-      seen.add(url)
-      return true
-    })
-}
+import { parseStat, parseDeduplicatedList, parseDeduplicatedUrlList } from '@/lib/shared-utils'
 
 async function syncTagsAndImages(characterId: string, tagsInput: string, imageUrlsInput: string) {
   const supabase = await createClient()
 
-  const tags = parseTags(tagsInput)
-  const imageUrls = parseImageUrls(imageUrlsInput)
+  const tags = parseDeduplicatedList(tagsInput)
+  const imageUrls = parseDeduplicatedUrlList(imageUrlsInput)
 
   await supabase.from('character_tags').delete().eq('character_id', characterId)
   await supabase.from('character_images').delete().eq('character_id', characterId)

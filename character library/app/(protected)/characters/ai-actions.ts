@@ -7,18 +7,14 @@ import {
   type CharacterSummaryContext,
 } from './ai-utils'
 import { createClient } from '@/lib/supabase/server'
+import { parseField, parseStat } from '@/lib/shared-utils'
 
 function readField(formData: FormData, name: string): string {
-  return String(formData.get(name) ?? '').trim()
+  return parseField(formData.get(name))
 }
 
 function readStat(formData: FormData, name: string): number {
-  const value = Number.parseInt(String(formData.get(name) ?? '10'), 10)
-  if (Number.isNaN(value)) {
-    return 10
-  }
-
-  return Math.min(30, Math.max(1, value))
+  return parseStat(formData.get(name))
 }
 
 export type GenerateResult = {
